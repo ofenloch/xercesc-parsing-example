@@ -2,12 +2,6 @@
 
 int main(int argc, char *argv[])
 {
-  CHello myGreeter;
-
-  myGreeter.sayHello();
-
-  myGreeter.sayHello("Hello, World!");
-
   if (argc <= 1)
   {
     std::cout << "Usage: " << argv[0] << " <xml file>" << std::endl
@@ -17,6 +11,7 @@ int main(int argc, char *argv[])
     return 1;
   }
   std::string filename = argv[1];
+  std::cout << "Parsing file \"" << filename << "\" ..." << std::endl;
 
   // Independent of the API you want to use, DOM, SAX, or SAX2, your application
   // must initialize the Xerces system before using the API, and terminate it
@@ -70,7 +65,7 @@ int main(int argc, char *argv[])
   catch (const xercesc::SAXParseException &toCatch)
   {
     char *message = xercesc::XMLString::transcode(toCatch.getMessage());
-    std::cout << "Exception message is:" << std::endl
+    std::cout << "SAXParseException: message is:" << std::endl
               << message << std::endl;
     xercesc::XMLString::release(&message);
     return -1;
@@ -78,7 +73,7 @@ int main(int argc, char *argv[])
   catch (const xercesc::XMLException &toCatch)
   {
     char *message = xercesc::XMLString::transcode(toCatch.getMessage());
-    std::cout << "Exception message is:" << std::endl
+    std::cout << "XMLException: message is:" << std::endl
               << message << std::endl;
     xercesc::XMLString::release(&message);
     return -1;
@@ -86,7 +81,7 @@ int main(int argc, char *argv[])
   catch (const xercesc::DOMException &toCatch)
   {
     char *message = xercesc::XMLString::transcode(toCatch.msg);
-    std::cout << "Exception message is:" << std::endl
+    std::cout << "DOMException: message is:" << std::endl
               << message << std::endl;
     xercesc::XMLString::release(&message);
     return -1;
