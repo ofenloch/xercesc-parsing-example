@@ -2,5 +2,5 @@
 
 add_executable(xercesc-parsing-exampletest ${CMAKE_SOURCE_DIR}/test/source/main.cpp)
 
-target_link_libraries(xercesc-parsing-exampletest xercesc-parsing-examplelib)
+target_link_libraries(xercesc-parsing-exampletest xercesc-parsing-examplelib ${XERCES_LIBRARIES})
 

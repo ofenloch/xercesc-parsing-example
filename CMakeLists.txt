@@ -12,16 +12,24 @@ set(PROJECT_ROOT /home/ofenloch/workspaces/cpp/xercesc-parsing-example)
 set(PROJECT_NAME xercesc-parsing-example)
 
 # set C++ standard
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14) # try C++14, then fall back to C++11 and C++98 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# use find_package to get the xerces-c stuff
+find_package(PkgConfig)
+pkg_check_modules (XERCES REQUIRED xerces-c)
+
 # set include directories
 include_directories(
+  ${XERCES_INCLUDE_DIRS}
   "${CMAKE_SOURCE_DIR}/bin/include"
   "${CMAKE_SOURCE_DIR}/lib/include"
   "${CMAKE_SOURCE_DIR}/test/include"
 )
+
+# set link directories
+link_directories(${XERCES_LIBRARY_DIRS})
 
 # include the sub-projects in bin, lib and test
 add_subdirectory(lib)
