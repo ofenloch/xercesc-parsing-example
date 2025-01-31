@@ -102,6 +102,10 @@ int main(int argc, char *argv[])
   m_parser->setDoNamespaces(true); // optional
   xercesc::ErrorHandler *m_errorHandler = (xercesc::ErrorHandler *)new xercesc::HandlerBase();
   m_parser->setErrorHandler(m_errorHandler);
+  // Tell the parser to create entity reference nodes (defaults to false):
+  // NOTE: Setting this to false will cause the parser to resolve entities!
+  // The documentation is either wrong or very misleading.
+  m_parser->setCreateEntityReferenceNodes(false);
 
   xercesc::DOMDocument *m_document = nullptr;
 
