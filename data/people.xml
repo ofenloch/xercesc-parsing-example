@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!DOCTYPE personnel SYSTEM "people.dtd">
-
-<!-- @version: -->
+<!DOCTYPE personnel SYSTEM "people.dtd"
+[
+  <!ENTITY four.worker SYSTEM "four.worker.xml">
+  <!ENTITY five.worker SYSTEM "five.worker.xml">
+]>
 
 <personnel>
 
@@ -29,16 +31,11 @@
     <link manager="Big.Boss"/>
   </person>
 
-  <person id="four.worker">
-    <name><family>Worker</family> <given>Four</given></name>
-    <email>four@foo.com</email>
-    <link manager="Big.Boss"/>
-  </person>
+  &four.worker;
 
-  <person id="five.worker">
-    <name><family>Worker</family> <given>Five</given></name>
-    <email>five@foo.com</email>
-    <link manager="Big.Boss"/>
-  </person>
+  &five.worker;
+
+  <!-- If an entity is not defined, it is simply ignored. Like &undefined_entity; here: -->
+  &undefined_entity;
 
 </personnel>
