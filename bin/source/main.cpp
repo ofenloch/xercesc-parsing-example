@@ -1,8 +1,7 @@
 #include <main.h>
 
-int serializeDOM(xercesc::DOMNode *node)
+int serializeDOM(const xercesc::DOMNode *node)
 {
-
   XMLCh tempStr[100];
   xercesc::XMLString::transcode("LS", tempStr, 99);
   xercesc::DOMImplementation *impl = xercesc::DOMImplementationRegistry::getDOMImplementation(tempStr);
@@ -66,7 +65,7 @@ int serializeDOM(xercesc::DOMNode *node)
 
   delete myFormTarget;
   return 0;
-}
+} // int serializeDOM(const xercesc::DOMNode *node)
 
 int main(int argc, char *argv[])
 {
