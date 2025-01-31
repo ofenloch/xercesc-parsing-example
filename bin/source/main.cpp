@@ -1,5 +1,73 @@
 #include <main.h>
 
+int serializeDOM(xercesc::DOMNode *node)
+{
+
+  XMLCh tempStr[100];
+  xercesc::XMLString::transcode("LS", tempStr, 99);
+  xercesc::DOMImplementation *impl = xercesc::DOMImplementationRegistry::getDOMImplementation(tempStr);
+  xercesc::DOMLSSerializer *theSerializer = ((xercesc::DOMImplementationLS *)impl)->createLSSerializer();
+
+  // optionally you can set some features on this serializer
+  if (theSerializer->getDomConfig()->canSetParameter(xercesc::XMLUni::fgDOMWRTDiscardDefaultContent, true))
+    theSerializer->getDomConfig()->setParameter(xercesc::XMLUni::fgDOMWRTDiscardDefaultContent, true);
+
+  if (theSerializer->getDomConfig()->canSetParameter(xercesc::XMLUni::fgDOMWRTFormatPrettyPrint, true))
+    theSerializer->getDomConfig()->setParameter(xercesc::XMLUni::fgDOMWRTFormatPrettyPrint, true);
+
+  // optionally you can implement your DOMLSSerializerFilter (e.g. MyDOMLSSerializerFilter)
+  // and set it to the serializer
+  // xercesc::DOMLSSerializer *myFilter = new myDOMLSSerializerFilter();
+  // theSerializer->setFilter(myFilter);
+
+  // optionally you can implement your DOMErrorHandler (e.g. MyDOMErrorHandler)
+  // and set it to the serializer
+  // xercesc::DOMErrorHandler *errHandler = new myDOMErrorHandler();
+  // theSerializer->getDomConfig()->setParameter(xercesc::XMLUni::fgDOMErrorHandler, myErrorHandler);
+
+  // StdOutFormatTarget prints the resultant XML stream
+  // to stdout once it receives any thing from the serializer.
+  xercesc::XMLFormatTarget *myFormTarget = new xercesc::StdOutFormatTarget();
+  xercesc::DOMLSOutput *theOutput = ((xercesc::DOMImplementationLS *)impl)->createLSOutput();
+  theOutput->setByteStream(myFormTarget);
+
+  try
+  {
+    // do the serialization through DOMLSSerializer::write();
+    theSerializer->write(node, theOutput);
+  }
+  catch (const xercesc::XMLException &toCatch)
+  {
+    char *message = xercesc::XMLString::transcode(toCatch.getMessage());
+    std::cout << "Exception message is: \n"
+              << message << "\n";
+    xercesc::XMLString::release(&message);
+    return -1;
+  }
+  catch (const xercesc::DOMException &toCatch)
+  {
+    char *message = xercesc::XMLString::transcode(toCatch.msg);
+    std::cout << "Exception message is: \n"
+              << message << "\n";
+    xercesc::XMLString::release(&message);
+    return -1;
+  }
+  catch (...)
+  {
+    std::cout << "Unexpected Exception \n";
+    return -1;
+  }
+
+  theOutput->release();
+  theSerializer->release();
+  // delete myErrorHandler and myFilter if they were created:
+  // delete myErrorHandler;
+  // delete myFilter;
+
+  delete myFormTarget;
+  return 0;
+}
+
 int main(int argc, char *argv[])
 {
   if (argc <= 1)
@@ -86,6 +154,9 @@ int main(int argc, char *argv[])
     xercesc::XMLString::release(&message);
     return -1;
   }
+
+  serializeDOM(m_document);
+
   // terminate
   xercesc::XMLPlatformUtils::Terminate();
   return 0;
