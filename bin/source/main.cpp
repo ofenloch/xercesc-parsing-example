@@ -1,5 +1,54 @@
 #include <main.h>
 
+/**
+ * @brief parse the given XML file and return the DOMDocument
+ * 
+ * @param filename the file to parse
+ * @return xercesc::DOMDocument* pointer to the parsed document or nullptr if an error occurred
+ */
+xercesc::DOMDocument *parseDOM(const std::string &filename)
+{
+  xercesc::XercesDOMParser *parser = new xercesc::XercesDOMParser();
+  parser->setValidationScheme(xercesc::XercesDOMParser::Val_Always);
+  parser->setDoNamespaces(true); // optional
+  xercesc::ErrorHandler *m_errorHandler = (xercesc::ErrorHandler *)new xercesc::HandlerBase();
+  parser->setErrorHandler(m_errorHandler);
+  // Tell the parser to create entity reference nodes (defaults to false):
+  // NOTE: Setting this to false will cause the parser to resolve entities!
+  // The documentation is either wrong or very misleading.
+  parser->setCreateEntityReferenceNodes(false);
+
+  try
+  {
+    parser->parse(filename.c_str());
+    return parser->getDocument();
+  }
+  catch (const xercesc::SAXParseException &toCatch)
+  {
+    char *message = xercesc::XMLString::transcode(toCatch.getMessage());
+    std::cout << "SAXParseException: message is:" << std::endl
+              << message << std::endl;
+    xercesc::XMLString::release(&message);
+    return nullptr;
+  }
+  catch (const xercesc::XMLException &toCatch)
+  {
+    char *message = xercesc::XMLString::transcode(toCatch.getMessage());
+    std::cout << "XMLException: message is:" << std::endl
+              << message << std::endl;
+    xercesc::XMLString::release(&message);
+    return nullptr;
+  }
+  catch (const xercesc::DOMException &toCatch)
+  {
+    char *message = xercesc::XMLString::transcode(toCatch.msg);
+    std::cout << "DOMException: message is:" << std::endl
+              << message << std::endl;
+    xercesc::XMLString::release(&message);
+    return nullptr;
+  }
+} // xercesc::DOMDocument* parseDOM(const std::string &filename)
+
 int serializeDOM(const xercesc::DOMNode *node)
 {
   XMLCh tempStr[100];
@@ -86,83 +135,21 @@ int main(int argc, char *argv[])
   try
   {
     xercesc::XMLPlatformUtils::Initialize();
-    // Do not forget to call
-    //    xercesc::XMLPlatformUtils::Terminate();
-    // when you're done.
+
+    xercesc::DOMDocument *document = parseDOM(filename);
+    if (document == nullptr)
+    {
+      std::cout << "Error parsing file \"" << filename << "\" :-(" << std::endl;
+      return -1;
+    }
+    serializeDOM(document);
+    // Do not forget to call when you're done.
+    xercesc::XMLPlatformUtils::Terminate();
   }
   catch (const xercesc::XMLException &toCatch)
   {
     // Do your failure processing here
     return 1;
   }
-
-  xercesc::XercesDOMParser *m_parser = new xercesc::XercesDOMParser();
-  m_parser->setValidationScheme(xercesc::XercesDOMParser::Val_Always);
-  m_parser->setDoNamespaces(true); // optional
-  xercesc::ErrorHandler *m_errorHandler = (xercesc::ErrorHandler *)new xercesc::HandlerBase();
-  m_parser->setErrorHandler(m_errorHandler);
-  // Tell the parser to create entity reference nodes (defaults to false):
-  // NOTE: Setting this to false will cause the parser to resolve entities!
-  // The documentation is either wrong or very misleading.
-  m_parser->setCreateEntityReferenceNodes(false);
-
-  xercesc::DOMDocument *m_document = nullptr;
-
-  try
-  {
-    m_parser->parse(filename.c_str());
-    m_document = m_parser->getDocument();
-    std::cout << "Parsed file \"" << filename << "\" :-))" << std::endl;
-    xercesc::DOMDocumentType *docType = m_document->getDoctype();
-    char *message = xercesc::XMLString::transcode(docType->getName());
-    std::cout << "DOMDocumentType is \"" << message << "\"" << std::endl;
-    xercesc::DOMNodeList *children = m_document->getChildNodes();
-    if (children != nullptr)
-    {
-      int nChildren = children->getLength();
-      std::cout << "document has " << nChildren << " child node(s):" << std::endl;
-      xercesc::XMLString::release(&message);
-      for (int i = 0; i < nChildren; i++)
-      {
-        xercesc::DOMNode *child = children->item(i);
-        std::cout << "  " << i + 1 << " : " << xercesc::XMLString::transcode(child->getNodeName()) << std::endl;
-      }
-    }
-    else
-    {
-      std::cout << "document has no  child nodes" << std::endl;
-    }
-  }
-  catch (const xercesc::SAXParseException &toCatch)
-  {
-    char *message = xercesc::XMLString::transcode(toCatch.getMessage());
-    std::cout << "SAXParseException: message is:" << std::endl
-              << message << std::endl;
-    xercesc::XMLString::release(&message);
-    return -1;
-  }
-  catch (const xercesc::XMLException &toCatch)
-  {
-    char *message = xercesc::XMLString::transcode(toCatch.getMessage());
-    std::cout << "XMLException: message is:" << std::endl
-              << message << std::endl;
-    xercesc::XMLString::release(&message);
-    return -1;
-  }
-  catch (const xercesc::DOMException &toCatch)
-  {
-    char *message = xercesc::XMLString::transcode(toCatch.msg);
-    std::cout << "DOMException: message is:" << std::endl
-              << message << std::endl;
-    xercesc::XMLString::release(&message);
-    return -1;
-  }
-
-  serializeDOM(m_document);
-
-  // terminate
-  xercesc::XMLPlatformUtils::Terminate();
-  return 0;
-
   return 0;
 } // int main(int argc, char *argv[])
